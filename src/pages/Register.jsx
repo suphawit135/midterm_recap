@@ -1,7 +1,8 @@
-import axios from "axios";
+import axios, { formToJSON } from "axios";
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import { registerValidator2 } from "../validators/registor.validators2";
 
 function Register() {
   const [formData, setFormdata] = useState({
@@ -10,6 +11,8 @@ function Register() {
     email: "",
     phone: "",
   });
+
+  const [error,setError] = useState({})
   const inputStyle = "border p-0.5 px-2 border-gray-500 rounded-md";
   
   const navigate = useNavigate()
@@ -22,7 +25,16 @@ function Register() {
 
   const hdlSubmit = async (evt) => {
     evt.preventDefault();
+    setError({})
+   const result= registerValidator2.safeParse(formData)
 
+   if(!result.success){
+    const {fieldErrors} = result.error.flatten()
+    console.log(fieldErrors)
+    setError(fieldErrors)
+    return
+   }
+  
     try {
       const res = await axios.post(
         "https://jsonplaceholder.typicode.com/posts",
@@ -55,6 +67,7 @@ function Register() {
           onChange={hdlChange}
           value={formData.username}
         ></input>
+        {error.username && <p className="text-red-500">{error.username[0]}</p>}
 
         <label htmlFor="" name="password">
           password:
@@ -67,16 +80,19 @@ function Register() {
           onChange={hdlChange}
           value={formData.password}
         ></input>
+        {error.password && <p className="text-red-500">{error.password[0]}</p>}
 
         <label htmlFor="">email:</label>
         <input
-          type="email"
+          type="text"
           className={inputStyle}
           name="email"
           placeholder="example@mail.com"
           onChange={hdlChange}
           value={formData.email}
         ></input>
+        {error.email && <p className="text-red-500">{error.email[0]}</p>}
+
 
         <label htmlFor="">phone:</label>
         <input
@@ -87,6 +103,8 @@ function Register() {
           onChange={hdlChange}
           value={formData.phone}
         ></input>
+          {error.phone && <p className="text-red-500">{error.phone[0]}</p>}
+
         <button className="bg-amber-300 py-1 mt-3 rounded-2xl cursor-pointer hover:bg-rose-400 transition-all duration-150">
           Register
         </button>
